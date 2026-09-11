@@ -1,0 +1,109 @@
+{
+  "layers": [
+    {
+      "key": "aspen",
+      "name": "Aspen Density",
+      "files": {
+        "full": "layers/aspen_full.png",
+        "forest": "layers/aspen_forest.png"
+      },
+      "cmap": "YlGn",
+      "norm": "log",
+      "vmin": 6.343554496765137,
+      "vmax": 7319.1787109375,
+      "center": null,
+      "units": "stems/ha (modeled)",
+      "description": "Continuous aspen stem density. Higher = denser aspen stands.",
+      "bounds": {
+        "west": -112.16388685640779,
+        "south": 38.317444249614155,
+        "east": -111.81771066706646,
+        "north": 38.76580860659372
+      },
+      "width": 1003,
+      "height": 1660
+    },
+    {
+      "key": "regen",
+      "name": "High Regen Probability",
+      "files": {
+        "full": "layers/regen_full.png",
+        "forest": "layers/regen_forest.png"
+      },
+      "cmap": "viridis",
+      "norm": "linear",
+      "vmin": 0.0,
+      "vmax": 1.0,
+      "center": null,
+      "units": "probability (0\u20131)",
+      "description": "Predicted probability of high post-fire regeneration.",
+      "bounds": {
+        "west": -112.16388685640779,
+        "south": 38.317444249614155,
+        "east": -111.81771066706646,
+        "north": 38.76580860659372
+      },
+      "width": 1003,
+      "height": 1660
+    },
+    {
+      "key": "phenology",
+      "name": "Phenology",
+      "files": {
+        "full": "layers/phenology_full.png",
+        "forest": "layers/phenology_forest.png"
+      },
+      "cmap": "RdYlGn",
+      "norm": "diverging",
+      "vmin": -0.4954822361469269,
+      "vmax": 0.4954822361469269,
+      "center": 0.0,
+      "units": "index (centered at 0)",
+      "description": "Phenological signal centered at 0. Negative = browner/earlier; positive = greener/later.",
+      "bounds": {
+        "west": -112.16388685640779,
+        "south": 38.317444249614155,
+        "east": -111.81771066706646,
+        "north": 38.76580860659372
+      },
+      "width": 1003,
+      "height": 1660
+    },
+    {
+      "key": "severity",
+      "name": "Burn Severity (RdNBR)",
+      "files": {
+        "full": "layers/severity_full.png",
+        "forest": "layers/severity_forest.png"
+      },
+      "cmap": "RdBu_r",
+      "norm": "diverging",
+      "vmin": -2.3656816482543945,
+      "vmax": 2.3656816482543945,
+      "center": 0.0,
+      "units": "RdNBR (centered at 0)",
+      "description": "Relativized differenced Normalized Burn Ratio. Red = higher severity, blue = unburned/recovery.",
+      "bounds": {
+        "west": -112.16388685640779,
+        "south": 38.317444249614155,
+        "east": -111.81771066706646,
+        "north": 38.76580860659372
+      },
+      "width": 1003,
+      "height": 1660
+    }
+  ],
+  "has_forest_mask": true,
+  "bounds": {
+    "west": -112.16388685640779,
+    "south": 38.317444249614155,
+    "east": -111.81771066706646,
+    "north": 38.76580860659372
+  },
+  "center": {
+    "lat": 38.54162642810394,
+    "lon": -111.99079876173712
+  },
+  "crs_source": "EPSG:32612",
+  "crs_display": "EPSG:3857 / WGS84 bounds for overlay"
+}

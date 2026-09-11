@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Monroe Mountain — Aspen Regeneration After Fire</title>
+
+<style>
+  em { font-style: normal; font-weight: 700; }
+
+  :root {
+    --paper:        #ffffff;
+    --paper-deep:   #ffffff;
+    --ink:          #1c2520;
+    --ink-soft:     #4a5249;
+    --ink-faint:    #8a8e84;
+    --rule:         #c8c0ad;
+    --rule-soft:    #ddd5c2;
+    --accent:       #6b3a1f;
+    --accent-warm:  #b85c2c;
+    --accent-pale:  #d89272;
+    --moss:         #4d6a3a;
+    --moss-pale:    #9bb083;
+    --slate:        #6b7370;
+    --slate-pale:   #b4b9b4;
+    --shadow:       0 1px 0 rgba(28,37,32,.04), 0 8px 28px -12px rgba(28,37,32,.18);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 17px;
+    line-height: 1.65;
+    font-feature-settings: "ss01", "onum";
+    font-style: normal;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .topbar-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .brand {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 500;
+    font-size: 16.5px;
+    letter-spacing: -.005em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand em { color: var(--accent); font-weight: 400; }
+  .nav { margin-left: auto; display: flex; gap: 22px; }
+  .nav a {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  .nav a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+  /* ---------- Page container ---------- */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 32px 96px;
+  }
+
+  /* ---------- Hero ---------- */
+  .eyebrow {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+  h1.title {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 400;
+    font-size: 54px;
+    line-height: 1.04;
+    letter-spacing: -.015em;
+    margin: 0 0 22px;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  h1.title em { font-weight: 400; color: var(--accent); }
+  .hero-lede {
+    font-size: 19.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    font-style: normal;
+    max-width: 600px;
+    margin: 0 0 44px;
+  }
+
+  /* prose-slot placeholder — visible while empty, easy to find and replace */
+  .prose-slot {
+    border-left: 2px solid var(--rule-soft);
+    padding: 4px 0 4px 18px;
+    margin: 0 0 36px;
+    color: var(--ink-faint);
+    font-style: normal;
+    font-size: 15px;
+  }
+  .prose-slot::before {
+    content: "Prose slot — replace with your writing.";
+    display: block;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    opacity: .7;
+    margin-bottom: 4px;
+  }
+
+  /* ---------- Headline stats grid ---------- */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: 0 0 56px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (max-width: 640px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+  .stat {
+    padding: 22px 22px 22px 0;
+    border-right: 1px dotted var(--rule);
+  }
+  .stat:last-child { border-right: none; }
+  @media (max-width: 640px) {
+    .stat { border-right: none; border-bottom: 1px dotted var(--rule); padding: 18px 0; }
+    .stat:last-child { border-bottom: none; }
+  }
+  .stat-value {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .stat-unit {
+    font-size: 14px;
+    font-family: 'Times New Roman', Times, serif;
+    color: var(--ink-faint);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .stat-label {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 8px;
+  }
+  .stat-sub {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-style: normal;
+  }
+
+  /* ---------- Section blocks ---------- */
+  section { margin: 0 0 64px; }
+
+  .section-eyebrow {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .section-eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule-soft);
+  }
+
+  h2.section-title {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 500;
+    font-size: 28px;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+    margin: 0 0 8px;
+  }
+  h2.section-title em { font-weight: 400; color: var(--accent); }
+
+  .section-deck {
+    color: var(--ink-soft);
+    font-style: normal;
+    font-size: 16px;
+    margin: 0 0 22px;
+    max-width: 600px;
+  }
+
+  /* ---------- Chart: distribution strip ---------- */
+  .chart-card {
+    border: 1px solid var(--rule-soft);
+    background: #ffffff;
+    padding: 22px 26px;
+    border-radius: 2px;
+    box-shadow: var(--shadow);
+  }
+  .chart-card svg { display: block; width: 100%; height: auto; }
+  .chart-caption {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    letter-spacing: .12em;
+    margin: 14px 0 0;
+    line-height: 1.6;
+  }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .chart-legend .swatch {
+    display: inline-block;
+    width: 11px; height: 11px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  /* ---------- Numbers list (used for blocks like the uncertain-zone summary) ---------- */
+  .num-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px dotted var(--rule);
+  }
+  .num-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 12px 0;
+    border-bottom: 1px dotted var(--rule);
+    gap: 16px;
+  }
+  .num-list .key {
+    color: var(--ink-soft);
+    font-size: 15.5px;
+  }
+  .num-list .val {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14px;
+    color: var(--ink);
+    font-feature-settings: "tnum";
+    white-space: nowrap;
+  }
+  .num-list .val .pct {
+    color: var(--ink-faint);
+    margin-left: 6px;
+  }
+
+  /* ---------- Table ---------- */
+  table.zone-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  table.zone-table thead th {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: right;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--rule);
+    font-weight: 400;
+  }
+  table.zone-table thead th:first-child { text-align: left; }
+  table.zone-table tbody td {
+    padding: 12px 8px;
+    border-bottom: 1px dotted var(--rule);
+    text-align: right;
+    font-family: 'Times New Roman', Times, serif;
+    font-feature-settings: "tnum";
+    color: var(--ink);
+  }
+  table.zone-table tbody td:first-child {
+    text-align: left;
+    font-family: 'Times New Roman', Times, serif;
+    color: var(--ink);
+    font-size: 15px;
+  }
+  table.zone-table tbody tr:last-child td { border-bottom: none; }
+  .zone-dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ---------- Pull quote / callout ---------- */
+  .callout {
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 22px;
+    margin: 24px 0;
+    font-size: 16.5px;
+    color: var(--ink-soft);
+    font-style: normal;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta-row {
+    display: flex;
+    justify-content: center;
+    margin: 80px 0 0;
+    padding-top: 36px;
+    border-top: 1px solid var(--rule);
+  }
+  .cta {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1.5px solid var(--accent);
+    padding: 4px 2px;
+    transition: color .15s ease;
+  }
+  .cta:hover { color: var(--accent); }
+  .cta .arrow { display: inline-block; transition: transform .2s ease; }
+  .cta:hover .arrow { transform: translateX(4px); }
+
+  /* ---------- Footer ---------- */
+  footer {
+    border-top: 1px solid var(--rule);
+    background: var(--paper-deep);
+    margin-top: 80px;
+  }
+  footer .inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 32px;
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-style: normal;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ---------- Reveal animation ---------- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+  main > * { animation: fadeUp .55s ease both; }
+  main > *:nth-child(2) { animation-delay: .05s; }
+  main > *:nth-child(3) { animation-delay: .12s; }
+  main > *:nth-child(4) { animation-delay: .18s; }
+  main > *:nth-child(5) { animation-delay: .24s; }
+</style>
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="brand">Monroe Mountain <em>Aspen Atlas</em></a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="results.html" aria-current="page">Results</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- =========================================================
+     Hero
+     ========================================================= -->
+<p class="eyebrow">Monroe Mountain · Fishlake N.F. · Utah</p>
+<h1 class="title">Predicting aspen regeneration<br>after fire: <em>Results</em></h1>
+<p style="text-align: center; font-style: normal; font-size: 17px; color: var(--ink-soft); margin: 16px 0 8px;">A collaboration between the University of Washington, PWFSL and the US Forest Service</p>
+<p style="text-align: center; font-style: normal; font-size: 15px; color: var(--ink-faint); margin: 8px 0 24px;">By Mateo Alliende</p>
+<p class="hero-lede">A spatial model of post-fire high-regeneration probability across ~37,150 acres of forested burn on Monroe Mountain, with companion surfaces for pre-fire aspen presence (via phenology metrics), burn severity (RdNBR), and pre-fire aspen density (stem counts).</p>
+
+<p>An improved understanding of how fuels and treatments contributed to this wildfire, as well as how the forest can be expected to recover, will aid future forest and fire management in the western United States.</p>
+
+<!-- ===== Headline stats ===== -->
+<div class="stats-grid">
+  <div class="stat">
+    <div class="stat-value">37,149 <span class="stat-unit">ac</span></div>
+    <div class="stat-label">Forested burn area</div>
+    <div class="stat-sub">total study extent</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">2,173 <span class="stat-unit">ac</span></div>
+    <div class="stat-label">Predicted high regen</div>
+    <div class="stat-sub">5.9% at Youden threshold (0.73)</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">10,705 <span class="stat-unit">ac</span></div>
+    <div class="stat-label">Uncertain but likely</div>
+    <div class="stat-sub">probability 0.55–0.73</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">7,614 <span class="stat-unit">ac</span></div>
+    <div class="stat-label">Uncertain but unlikely</div>
+    <div class="stat-sub">probability 0.40–0.55</div>
+  </div>
+</div>
+
+<!-- =========================================================
+     Probability distribution
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 01</p>
+  <h2 class="section-title">The probability surface</h2>
+  <p class="section-deck">Distribution of predicted high-regen probability across the forested burn area.</p>
+
+  <p>The model presents a probabilistic representation for recovery. It may also be useful for managers to better understand where dense regeneration can be expected.</p>
+
+  <div class="chart-card">
+    <!-- Distribution strip: 10–90 percentile range, IQR box, median tick, mean triangle, Youden line -->
+    <!-- viewBox: 0..760 wide, 0..160 tall. Plot area x: 60..720 maps to data 0..1 -->
+    <svg viewBox="0 0 760 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Probability distribution strip">
+      <defs>
+        <pattern id="dots" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r=".5" fill="#8a8e84" opacity=".5"/>
+        </pattern>
+      </defs>
+
+      <!-- Axis line -->
+      <line x1="60" y1="100" x2="720" y2="100" stroke="#c8c0ad" stroke-width="1"/>
+
+      <!-- Tick marks every 0.1 -->
+      <g font-family="'Times New Roman', Times, serif" font-size="10" fill="#8a8e84" text-anchor="middle">
+        <!-- 0 -->   <line x1="60"  y1="100" x2="60"  y2="106" stroke="#c8c0ad"/><text x="60"  y="124">0.0</text>
+        <!-- 0.1 --> <line x1="126" y1="100" x2="126" y2="104" stroke="#c8c0ad"/>
+        <!-- 0.2 --> <line x1="192" y1="100" x2="192" y2="106" stroke="#c8c0ad"/><text x="192" y="124">0.2</text>
+        <!-- 0.3 --> <line x1="258" y1="100" x2="258" y2="104" stroke="#c8c0ad"/>
+        <!-- 0.4 --> <line x1="324" y1="100" x2="324" y2="106" stroke="#c8c0ad"/><text x="324" y="124">0.4</text>
+        <!-- 0.5 --> <line x1="390" y1="100" x2="390" y2="104" stroke="#c8c0ad"/>
+        <!-- 0.6 --> <line x1="456" y1="100" x2="456" y2="106" stroke="#c8c0ad"/><text x="456" y="124">0.6</text>
+        <!-- 0.7 --> <line x1="522" y1="100" x2="522" y2="104" stroke="#c8c0ad"/>
+        <!-- 0.8 --> <line x1="588" y1="100" x2="588" y2="106" stroke="#c8c0ad"/><text x="588" y="124">0.8</text>
+        <!-- 0.9 --> <line x1="654" y1="100" x2="654" y2="104" stroke="#c8c0ad"/>
+        <!-- 1.0 --> <line x1="720" y1="100" x2="720" y2="106" stroke="#c8c0ad"/><text x="720" y="124">1.0</text>
+      </g>
+
+      <!-- 10–90 percentile whisker: 0.145 -> x=155.7 ; 0.689 -> x=514.74 -->
+      <line x1="155.7" y1="100" x2="514.74" y2="100" stroke="#4a5249" stroke-width="2"/>
+      <line x1="155.7" y1="92" x2="155.7" y2="108" stroke="#4a5249" stroke-width="2"/>
+      <line x1="514.74" y1="92" x2="514.74" y2="108" stroke="#4a5249" stroke-width="2"/>
+
+      <!-- IQR box: 0.229 -> x=211.14 ; 0.594 -> x=452.04. Height 26 around y=100 -->
+      <rect x="211.14" y="84" width="240.9" height="32" fill="#9bb083" fill-opacity=".55" stroke="#4d6a3a" stroke-width="1"/>
+
+      <!-- Median tick: 0.461 -> x=364.26 -->
+      <line x1="364.26" y1="80" x2="364.26" y2="120" stroke="#1c2520" stroke-width="2"/>
+
+      <!-- Mean marker (triangle): 0.425 -> x=340.5 -->
+      <polygon points="340.5,72 335,80 346,80" fill="#6b3a1f"/>
+
+      <!-- Youden threshold dashed line: 0.73 -> x=541.8 -->
+      <line x1="541.8" y1="40" x2="541.8" y2="138" stroke="#b85c2c" stroke-width="1.25" stroke-dasharray="4 3"/>
+      <text x="541.8" y="32" text-anchor="middle"
+            font-family="'Times New Roman', Times, serif" font-size="10" fill="#b85c2c" letter-spacing=".1em">YOUDEN · 0.73</text>
+
+      <!-- Labels for percentiles -->
+      <g font-family="'Times New Roman', Times, serif" font-size="9" fill="#8a8e84">
+        <text x="155.7"  y="146" text-anchor="middle">P10 · 0.145</text>
+        <text x="211.14" y="158" text-anchor="middle">P25 · 0.229</text>
+        <text x="364.26" y="146" text-anchor="middle" fill="#1c2520">median · 0.461</text>
+        <text x="452.04" y="158" text-anchor="middle">P75 · 0.594</text>
+        <text x="514.74" y="146" text-anchor="middle">P90 · 0.689</text>
+      </g>
+
+      <!-- Mean callout -->
+      <text x="340.5" y="64" text-anchor="middle"
+            font-family="'Times New Roman', Times, serif" font-size="10" fill="#6b3a1f" letter-spacing=".05em">mean · 0.425</text>
+
+      <!-- x-axis label -->
+      <text x="390" y="14"
+            font-family="'Times New Roman', Times, serif" font-size="10"
+            fill="#8a8e84" letter-spacing=".22em" text-transform="uppercase" text-anchor="middle">PROBABILITY OF HIGH REGEN</text>
+    </svg>
+
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#9bb083; border:1px solid #4d6a3a"></span>IQR (P25–P75)</span>
+      <span><span class="swatch" style="background:#4a5249; height:2px; margin-bottom:4px;"></span>P10–P90 range</span>
+      <span><span class="swatch" style="background:#1c2520; width:2px"></span>Median</span>
+      <span><span class="swatch" style="background:#6b3a1f; clip-path:polygon(50% 0,0 100%,100% 100%)"></span>Mean</span>
+      <span><span class="swatch" style="background:#b85c2c"></span>Youden threshold</span>
+    </div>
+
+    <p class="chart-caption">MEAN 0.425 · MEDIAN 0.461 · SD 0.21 · N = forested burn pixels</p>
+  </div>
+</section>
+
+<!-- =========================================================
+     Threshold sensitivity
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 02</p>
+  <h2 class="section-title">Threshold sensitivity</h2>
+  <p class="section-deck">Area classified as high-regen at successive probability cutoffs.</p>
+
+  <p>This model is sensitive to probability thresholds, which can be set according to management goals and priorities. The Youden threshold (0.73) maximizes sensitivity and specificity against the validation data, but a lower threshold may be desirable to capture more potential high-regen areas (at the cost of more false positives).</p>
+
+  <div class="chart-card">
+    <!--
+      Data:
+      0.40 -> 20,493 acres (55.1%)
+      0.50 -> 16,955 acres (45.7%)
+      0.60 -> 8,782 acres (23.6%)
+      0.73 ->  2,173 acres (5.9%)
+      0.75 ->  1,564 acres (4.2%)
+      0.80 ->  766 acres (2.1%)
+      0.90 ->    12 acres (0.0%)
+
+      viewBox 0..760 x 0..280
+      Plot area: x 70..720 (640 wide) maps threshold 0.35..0.95
+        => x(t) = 70 + (t - 0.35) / (0.95 - 0.35) * 650
+                = 70 + (t - 0.35) * 1083.33
+      y 50..240 (190 tall) maps area 0..22,240 acres (inverted)
+        => y(a) = 240 - a/22,240 * 190
+    -->
+    <svg viewBox="0 0 760 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Threshold sensitivity line chart">
+      <!-- y gridlines (0, 2000, 4000, 6000, 8000) -->
+      <g stroke="#ddd5c2" stroke-width="1">
+        <line x1="70" y1="240" x2="720" y2="240"/>
+        <line x1="70" y1="197.78" x2="720" y2="197.78"/>
+        <line x1="70" y1="155.56" x2="720" y2="155.56"/>
+        <line x1="70" y1="113.33" x2="720" y2="113.33"/>
+        <line x1="70" y1="71.11" x2="720" y2="71.11"/>
+      </g>
+
+      <!-- y-axis labels -->
+      <g font-family="'Times New Roman', Times, serif" font-size="10" fill="#8a8e84" text-anchor="end">
+        <text x="62" y="244">0</text>
+        <text x="62" y="201.78">2,000</text>
+        <text x="62" y="159.56">4,000</text>
+        <text x="62" y="117.33">6,000</text>
+        <text x="62" y="75.11">8,000</text>
+      </g>
+
+      <!-- y-axis title -->
+      <text x="22" y="160"
+            font-family="'Times New Roman', Times, serif" font-size="10" fill="#8a8e84"
+            transform="rotate(-90 22 160)" letter-spacing=".18em" text-anchor="middle">AREA (AC)</text>
+
+      <!-- x-axis -->
+      <line x1="70" y1="240" x2="720" y2="240" stroke="#1c2520" stroke-width="1"/>
+      <g font-family="'Times New Roman', Times, serif" font-size="10" fill="#8a8e84" text-anchor="middle">
+        <line x1="124.17" y1="240" x2="124.17" y2="246" stroke="#c8c0ad"/><text x="124.17" y="262">0.40</text>
+        <line x1="232.5"  y1="240" x2="232.5"  y2="246" stroke="#c8c0ad"/><text x="232.5"  y="262">0.50</text>
+        <line x1="340.83" y1="240" x2="340.83" y2="246" stroke="#c8c0ad"/><text x="340.83" y="262">0.60</text>
+        <line x1="449.17" y1="240" x2="449.17" y2="246" stroke="#c8c0ad"/><text x="449.17" y="262">0.70</text>
+        <line x1="557.5"  y1="240" x2="557.5"  y2="246" stroke="#c8c0ad"/><text x="557.5"  y="262">0.80</text>
+        <line x1="665.83" y1="240" x2="665.83" y2="246" stroke="#c8c0ad"/><text x="665.83" y="262">0.90</text>
+      </g>
+      <text x="395" y="278"
+            font-family="'Times New Roman', Times, serif" font-size="10" fill="#8a8e84"
+            text-anchor="middle" letter-spacing=".18em">PROBABILITY THRESHOLD</text>
+
+      <!-- Youden vertical marker at 0.73 -> x = 70 + 0.38*1083.33 = 481.67 -->
+      <line x1="481.67" y1="35" x2="481.67" y2="240" stroke="#b85c2c" stroke-width="1.25" stroke-dasharray="4 3"/>
+      <text x="481.67" y="28" text-anchor="middle"
+            font-family="'Times New Roman', Times, serif" font-size="10" fill="#b85c2c" letter-spacing=".1em">YOUDEN · 0.73</text>
+
+      <!-- Area under curve fill -->
+      <path d="
+        M 124.17 64.91
+        L 232.5  94.93
+        L 340.83 165.00
+        L 481.67 221.42
+        L 503.33 226.64
+        L 557.5  233.46
+        L 665.83 239.89
+        L 665.83 240
+        L 124.17 240 Z
+      " fill="#b85c2c" fill-opacity=".15"/>
+
+      <!-- Line -->
+      <path d="
+        M 124.17 64.91
+        L 232.5  94.93
+        L 340.83 165.00
+        L 481.67 221.42
+        L 503.33 226.64
+        L 557.5  233.46
+        L 665.83 239.89
+      " fill="none" stroke="#6b3a1f" stroke-width="2"/>
+
+      <!-- Data points + labels -->
+      <g>
+        <circle cx="124.17" cy="64.91" r="4" fill="#6b3a1f"/>
+        <text x="124.17" y="54" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">8,294</text>
+
+        <circle cx="232.5" cy="94.93" r="4" fill="#6b3a1f"/>
+        <text x="232.5" y="84" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">6,868</text>
+
+        <circle cx="340.83" cy="165.00" r="4" fill="#6b3a1f"/>
+        <text x="340.83" y="154" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">3,554</text>
+
+        <circle cx="481.67" cy="221.42" r="4.5" fill="#b85c2c" stroke="#6b3a1f" stroke-width="1.5"/>
+        <text x="481.67" y="213" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#b85c2c">880</text>
+
+        <circle cx="503.33" cy="226.64" r="3" fill="#6b3a1f"/>
+        <circle cx="557.5"  cy="233.46" r="3" fill="#6b3a1f"/>
+        <text x="557.5" y="226" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">310</text>
+
+        <circle cx="665.83" cy="239.89" r="3" fill="#6b3a1f"/>
+        <text x="665.83" y="232" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">5</text>
+      </g>
+    </svg>
+
+    <p class="chart-caption">AREA OF FORESTED BURN CLASSIFIED AS HIGH REGEN, BY PROBABILITY CUTOFF</p>
+  </div>
+</section>
+
+<!-- =========================================================
+     Confidence zones
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 03</p>
+  <h2 class="section-title">Confidence zones</h2>
+  <p class="section-deck">Splitting the surface into five probability bands — high confidence high regen, moderate confidence high regen, uncertain but likely regen, uncertain but unlikely regen, and high confidence low regen.</p>
+
+  <p>Confidence zones can help managers understand the spatial distribution of model uncertainty and identify areas where additional monitoring or adaptive management may be most valuable.</p>
+
+  <div class="chart-card">
+    <!--
+      Areas (ac):
+      High confidence high            (>0.80)       766
+      Moderate confidence high        (0.73-0.80)  1,408
+      Uncertain but likely regen      (0.55-0.73) 10,705
+      Uncertain but unlikely regen    (0.40-0.55)  7,614
+      High confidence low             (<0.40)    16,680
+      Total                              37,149
+
+      Bar viewBox 0..760 x 0..120
+      Bar y=40..76 (h=36), x=0..760
+    -->
+    <svg viewBox="0 0 760 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Confidence zone breakdown">
+      <!-- Zone widths (proportional to ac / 37,149 * 760) -->
+      <!-- 310/15039*760  = 15.66
+           570/15039*760  = 28.79
+           4332/15039*760 = 218.92
+           3081/15039*760 = 155.80
+           6746/15039*760 = 340.89
+           cumulative x: 0, 15.66, 44.45, 263.37, 419.17, 760
+      -->
+      <g>
+        <rect x="0"      y="40" width="15.66"   height="36" fill="#4d6a3a"/>
+        <rect x="15.66"  y="40" width="28.79"   height="36" fill="#9bb083"/>
+        <rect x="44.45"  y="40" width="218.92"  height="36" fill="#b4c49a"/>
+        <rect x="263.37" y="40" width="155.80"  height="36" fill="#b85c2c" fill-opacity=".55"/>
+        <rect x="419.17" y="40" width="340.89"  height="36" fill="#6b7370" fill-opacity=".4"/>
+      </g>
+      <!-- subtle grid 0/25/50/75/100 % -->
+      <g font-family="'Times New Roman', Times, serif" font-size="9" fill="#8a8e84" text-anchor="middle">
+        <line x1="0" y1="76" x2="0" y2="84" stroke="#c8c0ad"/>
+        <line x1="190" y1="76" x2="190" y2="80" stroke="#c8c0ad"/>
+        <line x1="380" y1="76" x2="380" y2="84" stroke="#c8c0ad"/>
+        <line x1="570" y1="76" x2="570" y2="80" stroke="#c8c0ad"/>
+        <line x1="760" y1="76" x2="760" y2="84" stroke="#c8c0ad"/>
+        <text x="0"   y="96" text-anchor="start">0</text>
+        <text x="380" y="96">18,575 acres</text>
+        <text x="760" y="96" text-anchor="end">37,149 acres</text>
+      </g>
+
+      <!-- callout labels for big segments -->
+      <g font-family="'Times New Roman', Times, serif" font-size="11" fill="#1c2520">
+        <text x="164" y="32" text-anchor="middle" fill="#6b3a1f">UNCERTAIN BUT LIKELY · 10,705 acres</text>
+        <text x="589" y="32" text-anchor="middle" fill="#4a5249">HIGH CONF. LOW · 16,680 acres · 44.9%</text>
+      </g>
+
+      <!-- callouts for the small leftmost segments via leader lines -->
+      <g font-family="'Times New Roman', Times, serif" font-size="9" fill="#1c2520">
+        <line x1="7.83"   y1="40" x2="7.83"   y2="20" stroke="#4d6a3a" stroke-width="1"/>
+        <text x="0"  y="13" text-anchor="start" fill="#4d6a3a">HC HIGH · 766 acres</text>
+
+        <line x1="30"     y1="76" x2="30"     y2="110" stroke="#9bb083" stroke-width="1"/>
+        <text x="0"    y="120" text-anchor="start" fill="#4d6a3a">MOD. HIGH · 1,408 acres</text>
+      </g>
+    </svg>
+
+    <div class="chart-legend" style="margin-top:18px">
+      <span><span class="swatch" style="background:#4d6a3a"></span>High confidence high regen (>0.80)</span>
+      <span><span class="swatch" style="background:#9bb083"></span>Moderate confidence high regen (0.73–0.80)</span>
+      <span><span class="swatch" style="background:#b4c49a"></span>Uncertain but likely regen (0.55–0.73)</span>
+      <span><span class="swatch" style="background:#b85c2c; opacity:.55"></span>Uncertain but unlikely regen (0.40–0.55)</span>
+      <span><span class="swatch" style="background:#6b7370; opacity:.55"></span>High confidence low (<0.40)</span>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     Pre-fire aspen overlap
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 04</p>
+  <h2 class="section-title">Pre-fire aspen overlap</h2>
+  <p class="section-deck">How much of the predicted high-regen area coincides with strong pre-fire aspen signal?</p>
+
+  <div class="chart-card">
+    <svg viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pre-fire aspen signal across probability zones">
+      <!-- Y-axis -->
+      <line x1="60" y1="30" x2="60" y2="250" stroke="#1c2520" stroke-width="1"/>
+      <!-- X-axis -->
+      <line x1="60" y1="250" x2="680" y2="250" stroke="#1c2520" stroke-width="1"/>
+
+      <!-- Y-axis tick marks and labels -->
+      <g font-family="'Times New Roman', Times, serif" font-size="9" fill="#8a8e84" text-anchor="end">
+        <line x1="55" y1="250" x2="60" y2="250" stroke="#c8c0ad"/>
+        <text x="52" y="254">0</text>
+
+        <line x1="55" y1="180" x2="60" y2="180" stroke="#c8c0ad"/>
+        <text x="52" y="184">5k</text>
+
+        <line x1="55" y1="110" x2="60" y2="110" stroke="#c8c0ad"/>
+        <text x="52" y="114">10k</text>
+
+        <line x1="55" y1="40" x2="60" y2="40" stroke="#c8c0ad"/>
+        <text x="52" y="44">15k</text>
+
+        <line x1="55" y1="30" x2="60" y2="30" stroke="#c8c0ad"/>
+        <text x="52" y="34">18k</text>
+      </g>
+
+      <!-- Y-axis label -->
+      <text x="18" y="140" font-family="'Times New Roman', Times, serif" font-size="9" fill="#8a8e84" text-anchor="middle" transform="rotate(-90 18 140)" letter-spacing=".08em">ACRES</text>
+
+      <!-- BARS: scale is 18317 max → (max-30)*220 height mapping to plot area 30-250 (220 tall) -->
+      <!-- Bar 1: High Probability of Regen (2,173 ac) → height = (2173/18317)*220 = 25.94 -->
+      <!-- With aspen: 1,616 ac → height = (1616/18317)*220 = 19.36 -->
+      <!-- Without aspen: 558 ac → height = (558/18317)*220 = 6.68 -->
+      <rect x="100" y="224.06" width="60" height="19.36" fill="#4d6a3a"/>
+      <rect x="100" y="235.96" width="60" height="6.68" fill="#6b7370"/>
+
+      <!-- Bar 2: Uncertain (18,317 ac) → height = (18317/18317)*220 = 220 -->
+      <!-- With aspen: 2,997 ac (40%) → height = 88 -->
+      <!-- Without aspen: 15,320 ac (60%) → height = 132 -->
+      <rect x="190" y="30" width="60" height="88" fill="#4d6a3a"/>
+      <rect x="190" y="118" width="60" height="132" fill="#6b7370"/>
+
+      <!-- Bar 3: High Conf Low (16,668 ac) → height = (16668/18317)*220 = 200 -->
+      <!-- With aspen: 11,341 ac (68.1%) → height = 136 -->
+      <!-- Without aspen: 5,327 ac (31.9%) → height = 64 -->
+      <rect x="280" y="50" width="60" height="136" fill="#4d6a3a"/>
+      <rect x="280" y="186" width="60" height="64" fill="#6b7370"/>
+
+      <!-- Bar labels and values -->
+      <!-- Bar 1: High Regen -->
+      <text x="130" y="218" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="9" fill="#fff" font-weight="bold">1,616</text>
+      <text x="130" y="228" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#fff">74%</text>
+      <text x="130" y="245" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#1c2520">558</text>
+      
+      <!-- Bar 2: Uncertain -->
+      <text x="220" y="105" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="9" fill="#fff" font-weight="bold">2,997</text>
+      <text x="220" y="114" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#fff">40%</text>
+      <text x="220" y="180" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="9" fill="#1c2520">15,320</text>
+      <text x="220" y="190" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#1c2520">60%</text>
+
+      <!-- Bar 3: High Conf Low -->
+      <text x="310" y="125" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="9" fill="#fff" font-weight="bold">11,341</text>
+      <text x="310" y="134" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#fff">68%</text>
+      <text x="310" y="210" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="9" fill="#1c2520">5,327</text>
+      <text x="310" y="220" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#1c2520">32%</text>
+
+      <!-- Category labels -->
+      <text x="130" y="275" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520" font-weight="500">High Regen</text>
+      <text x="130" y="287" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#8a8e84">(>0.73)</text>
+
+      <text x="220" y="275" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520" font-weight="500">Uncertain</text>
+      <text x="220" y="287" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#8a8e84">(0.40–0.73)</text>
+
+      <text x="310" y="275" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520" font-weight="500">Low Regen</text>
+      <text x="310" y="287" text-anchor="middle" font-family="'Times New Roman', Times, serif" font-size="8" fill="#8a8e84">(<0.40)</text>
+
+      <!-- Legend -->
+      <g font-family="'Times New Roman', Times, serif" font-size="10" fill="#1c2520">
+        <rect x="420" y="80" width="12" height="12" fill="#4d6a3a"/>
+        <text x="440" y="89">With strong aspen signal</text>
+
+        <rect x="420" y="105" width="12" height="12" fill="#6b7370"/>
+        <text x="440" y="114">Without strong aspen signal</text>
+      </g>
+    </svg>
+
+    <p class="chart-caption">PRE-FIRE ASPEN SIGNAL ACROSS CONFIDENCE ZONES — ACRES WITH AND WITHOUT ASPEN PRESENCE</p>
+  </div>
+
+  <p>Aspen regeneration requires existing root stock, coupled with sufficient disturbance to trigger sprouting.</p>
+
+  <ul class="num-list">
+    <li>
+      <span class="key">High confidence regen with strong pre-fire aspen signal</span>
+      <span class="val">1,616 acres<span class="pct">· 74.3%</span></span>
+    </li>
+    <li>
+      <span class="key">High confidence regen without strong pre-fire aspen signal</span>
+      <span class="val">558 acres<span class="pct">· 25.7%</span></span>
+    </li>
+  </ul>
+
+  <p class="callout">Areas without aspen signal may reflect conifer encroachment released by fire.</p>
+</section>
+
+
+<!-- =========================================================
+     Uncertain but likely breakdown
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 06</p>
+  <h2 class="section-title">Inside the uncertain but likely zone</h2>
+  <p class="section-deck">Character of the 10,310-acre uncertain-but-likely zone — burn severity, phenology, and aspen signal.</p>
+
+  <p>This section focuses on the 0.55–0.73 probability band, where regeneration is uncertain but more likely than not. Managers may want to prioritize monitoring and adaptive management in this interval to better understand recovery trajectories.</p>
+
+  <ul class="num-list">
+    <li>
+      <span class="key">Total uncertain but likely area</span>
+      <span class="val">7863 acres</span>
+    </li>
+    <li>
+      <span class="key">Mean RdNBR</span>
+      <span class="val">1.343</span>
+    </li>
+    <li>
+      <span class="key">Pixels with high severity (>0.5)</span>
+      <span class="val">99.7%</span>
+    </li>
+    <li>
+      <span class="key">Mean phenology</span>
+      <span class="val">0.161</span>
+    </li>
+    <li>
+      <span class="key">Pixels with strong aspen signal</span>
+      <span class="val">72.6%</span>
+    </li>
+  </ul>
+</section>
+
+<!-- =========================================================
+     Zone comparison table
+     ========================================================= -->
+<section>
+  <p class="section-eyebrow">Section 07</p>
+  <h2 class="section-title">Zone comparison — RdNBR &amp; phenology</h2>
+  <p class="section-deck">Mean values across the five confidence bands.</p>
+
+  <p>The high-confidence-low band stands out because it combines lower modeled regeneration probability with milder burn severity and a stronger phenological signal than the rest of the uncertain spectrum. In contrast, the high-confidence-high and moderate-confidence-high bands occupy steep, severely burned terrain that still retains strong post-fire regeneration potential, while the uncertain-but-likely band sits between these outcomes and retains enough aspen signal to make recovery plausible without the same certainty.</p>
+
+  <table class="zone-table">
+    <thead>
+      <tr>
+        <th>Zone</th>
+        <th>Area (ac)</th>
+        <th>Mean RdNBR</th>
+        <th>Mean phenology</th>
+        <th>% high severity</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="zone-dot" style="background:#4d6a3a"></span>High confidence high</td>
+        <td>766</td><td>1.28</td><td>0.237</td><td>100.0</td>
+      </tr>
+      <tr>
+        <td><span class="zone-dot" style="background:#9bb083"></span>Moderate confidence high</td>
+        <td>1,408</td><td>1.43</td><td>0.231</td><td>100.0</td>
+      </tr>
+      <tr>
+        <td><span class="zone-dot" style="background:#b4c49a"></span>Uncertain but likely</td>
+        <td>10,703</td><td>1.37</td><td>0.184</td><td>100.0</td>
+      </tr>
+      <tr>
+        <td><span class="zone-dot" style="background:#b85c2c"></span>Uncertain but unlikely</td>
+        <td>3,026</td><td>1.30</td><td>0.127</td><td>99.2</td>
+      </tr>
+      <tr>
+        <td><span class="zone-dot" style="background:#6b7370"></span>High confidence low</td>
+        <td>14,728</td><td>0.608</td><td>0.240</td><td>62.2</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =========================================================
+     Final headline & CTA
+     ========================================================= -->
+<section style="margin-bottom:0">
+  <p class="section-eyebrow">In context</p>
+  <h2 class="section-title">Across the landscape, <em>~46%</em> of pixels exceed 0.50 probability</h2>
+  <p class="section-deck">16,934 acres of the forested burn — about 45.6% — show modeled high-regen probability above 0.50.</p>
+
+  <p>This is potentially the largest recovery event in recent Fishlake history
+<p></p>- Even without active intervention, fire-released root systems in high-severity zones should drive widespread sucker establishment
+
+Elk are major benefactors with increased forage recovery
+<p></p>- Concentrated and widespread forage for elk herds, potentially supporting population growth
+
+Improved resource allocation under scarcity
+<p></p>- Allows managers to concentrate limited restoration funding on areas most likely to succeed
+<p></p>Regardless of which decisions are made, managers can make then with greater scientific support</p>
+</section>
+
+<div class="cta-row">
+  <a class="cta" href="index.html">Explore the interactive map <span class="arrow">→</span></a>
+</div>
+
+</main>
+
+<footer>
+  <div class="inner">
+    <span>Monroe Mountain — Aspen Atlas · field results</span>
+    <span>EPSG:32612 · 30 m · NLCD forest mask 41/42/43</span>
+  </div>
+</footer>
+
+</body>
+</html>
