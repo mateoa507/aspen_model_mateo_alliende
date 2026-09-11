@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Monroe Mountain — Aspen, Phenology & Burn Severity</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+  em { font-style: normal; font-weight: 700; }
+  :root {
+    --paper:        #f3eee5;
+    --paper-deep:   #ece5d6;
+    --ink:          #1c2520;
+    --ink-soft:     #4a5249;
+    --ink-faint:    #8a8e84;
+    --rule:         #c8c0ad;
+    --rule-soft:    #ddd5c2;
+    --accent:       #6b3a1f;   /* burnt sienna */
+    --accent-warm:  #b85c2c;
+    --moss:         #4d6a3a;
+    --shadow:       0 1px 0 rgba(28,37,32,.04), 0 8px 28px -12px rgba(28,37,32,.18);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin:0; padding:0; height:100%; background:var(--paper); color:var(--ink); }
+
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    line-height: 1.55;
+    font-feature-settings: "ss01", "onum";
+    font-style: normal;
+    /* subtle paper grain */
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(107,58,31,.04) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(77,106,58,.03) 0, transparent 40%);
+  }
+
+  /* ---------- App shell ---------- */
+  .app {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  @media (max-width: 880px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .panel { max-height: 50vh; overflow-y: auto; }
+  }
+
+  /* ---------- Side panel ---------- */
+  .panel {
+    background: var(--paper);
+    border-right: 1px solid var(--rule);
+    padding: 28px 28px 32px;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: inset -1px 0 0 rgba(0,0,0,.02);
+  }
+
+  .panel::before {
+    /* deckle-edge ornament */
+    content: "";
+    position: absolute;
+    top: 0; right: -1px; bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(to bottom, var(--rule) 0 6px, transparent 6px 10px);
+    opacity: .6;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-decoration: none;
+    margin: 0 0 18px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  .back-link:hover {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  .back-link span {
+    display: inline-block;
+    transition: transform .15s ease;
+    margin-right: 4px;
+  }
+  .back-link:hover span { transform: translateX(-3px); }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+
+  h1.title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.05;
+    letter-spacing: -.01em;
+    margin: 0 0 6px;
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+  h1.title em {
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    font-style: normal;
+    margin: 0 0 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 22px 0 12px;
+  }
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule-soft);
+  }
+
+  /* ---------- View controls / toggle switch ---------- */
+  .view-controls { margin: 0 0 6px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 4px 0 12px;
+  }
+  .toggle-row.is-disabled { opacity: .45; pointer-events: none; }
+
+  .toggle {
+    flex-shrink: 0;
+    width: 34px; height: 19px;
+    border: 1.25px solid var(--ink);
+    background: var(--paper);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color .22s ease;
+    margin-top: 2px;
+  }
+  .toggle:focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 2px; }
+  .toggle .toggle-knob {
+    position: absolute;
+    top: 1.5px; left: 2px;
+    width: 13px; height: 13px;
+    background: var(--ink);
+    border-radius: 50%;
+    transition: transform .22s ease, background-color .22s ease;
+  }
+  .toggle[aria-checked="true"] {
+    background: var(--moss);
+    border-color: var(--moss);
+  }
+  .toggle[aria-checked="true"] .toggle-knob {
+    background: var(--paper);
+    transform: translateX(15px);
+  }
+
+  .toggle-text { line-height: 1.45; }
+  .toggle-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -.005em;
+  }
+  .toggle-desc {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: normal;
+    margin-top: 2px;
+  }
+
+  /* ---------- Layer controls ---------- */
+  .layer {
+    border-bottom: 1px dotted var(--rule);
+    padding: 12px 0 14px;
+    transition: background-color .25s ease;
+  }
+  .layer:last-of-type { border-bottom: none; }
+
+  .layer-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* custom checkbox -> hand-drawn looking square */
+  .check {
+    width: 18px; height: 18px;
+    border: 1.25px solid var(--ink);
+    background: var(--paper);
+    border-radius: 2px;
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    transition: background-color .18s ease;
+  }
+  .check[aria-checked="true"] {
+    background: var(--ink);
+  }
+  .check[aria-checked="true"]::after {
+    content: "";
+    width: 9px; height: 5px;
+    border-left: 1.5px solid var(--paper);
+    border-bottom: 1.5px solid var(--paper);
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .check:focus-visible { outline: 2px solid var(--accent-warm); outline-offset: 2px; }
+
+  .layer-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: -.005em;
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .layer-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    margin: 6px 0 0 30px;
+    letter-spacing: .02em;
+  }
+
+  .layer-desc {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin: 6px 0 8px 30px;
+    font-style: normal;
+    line-height: 1.5;
+  }
+
+  /* legend strip */
+  .legend {
+    margin: 8px 0 4px 30px;
+  }
+  .legend-bar {
+    height: 8px;
+    width: 100%;
+    border-radius: 1px;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+  .legend-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+    letter-spacing: .02em;
+  }
+
+  /* opacity slider */
+  .opacity-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 0 30px;
+  }
+  .opacity-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    min-width: 52px;
+  }
+  input[type=range] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    height: 18px;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 1px; background: var(--ink-faint);
+  }
+  input[type=range]::-moz-range-track {
+    height: 1px; background: var(--ink-faint);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px; height: 12px;
+    background: var(--paper);
+    border: 1.25px solid var(--ink);
+    border-radius: 50%;
+    margin-top: -6px;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 12px; height: 12px;
+    background: var(--paper);
+    border: 1.25px solid var(--ink);
+    border-radius: 50%;
+  }
+  .opacity-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    min-width: 30px;
+    text-align: right;
+  }
+
+  /* ---------- Footer notes ---------- */
+  .colophon {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    line-height: 1.6;
+    font-style: normal;
+  }
+  .colophon strong {
+    font-style: normal;
+    font-weight: 500;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Map ---------- */
+  .map-wrap {
+    position: relative;
+    background: var(--paper-deep);
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+    background: #e9e2d1;
+  }
+
+  /* Map overlay decorations */
+  .map-frame {
+    position: absolute; inset: 16px;
+    pointer-events: none;
+    border: 1px solid rgba(28,37,32,.12);
+    border-radius: 2px;
+    box-shadow: var(--shadow);
+    z-index: 400;
+  }
+
+  .compass {
+    position: absolute;
+    top: 30px; right: 30px;
+    width: 54px; height: 54px;
+    z-index: 500;
+    pointer-events: none;
+    opacity: .85;
+  }
+
+  .map-caption {
+    position: absolute;
+    left: 30px;
+    bottom: 30px;
+    z-index: 500;
+    background: rgba(243,238,229,.92);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 10px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    max-width: 320px;
+    box-shadow: var(--shadow);
+  }
+  .map-caption .cap-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 2px;
+  }
+  .map-caption .cap-coords {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: .02em;
+  }
+
+  /* basemap toggle */
+  .basemap-toggle {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    z-index: 500;
+    display: flex;
+    background: rgba(243,238,229,.92);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .basemap-toggle button {
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font: inherit;
+    border-right: 1px solid var(--rule-soft);
+    transition: background-color .15s ease;
+  }
+  .basemap-toggle button:last-child { border-right: none; }
+  .basemap-toggle button.on {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .basemap-toggle button:not(.on):hover { background: rgba(28,37,32,.06); }
+
+  /* Leaflet style overrides for the editorial feel */
+  .leaflet-container {
+    font-family: "Times New Roman", Times, serif;
+    background: #e9e2d1;
+    font-style: normal;
+  }
+  .leaflet-control-zoom {
+    border: 1px solid var(--rule) !important;
+    box-shadow: var(--shadow) !important;
+  }
+  .leaflet-control-zoom a {
+    background: rgba(243,238,229,.95) !important;
+    color: var(--ink) !important;
+    border-bottom: 1px solid var(--rule-soft) !important;
+    font-family: 'Fraunces', serif !important;
+    font-weight: 400 !important;
+  }
+  .leaflet-control-zoom a:hover {
+    background: var(--paper-deep) !important;
+  }
+  .leaflet-control-attribution {
+    background: rgba(243,238,229,.85) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 9.5px !important;
+    color: var(--ink-faint) !important;
+    border: 1px solid var(--rule-soft) !important;
+    padding: 2px 6px !important;
+  }
+  .leaflet-control-attribution a { color: var(--accent) !important; }
+
+  /* tooltip showing pixel readouts on hover */
+  .readout {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    z-index: 500;
+    background: rgba(243,238,229,.94);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 10px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    min-width: 180px;
+    box-shadow: var(--shadow);
+    line-height: 1.7;
+  }
+  .readout .ro-label {
+    color: var(--ink-faint);
+    font-size: 9.5px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .readout .ro-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .readout .ro-row span:first-child { color: var(--ink-soft); }
+
+  /* tiny intro reveal */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .panel > * { animation: fadeUp .6s ease both; }
+  .panel > *:nth-child(1) { animation-delay: .05s; }
+  .panel > *:nth-child(2) { animation-delay: .12s; }
+  .panel > *:nth-child(3) { animation-delay: .19s; }
+  .panel > *:nth-child(4) { animation-delay: .26s; }
+  .panel > *:nth-child(5) { animation-delay: .33s; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===== Side panel ===== -->
+  <aside class="panel" id="panel">
+    <a href="results.html" class="back-link" aria-label="Back to results">
+      <span aria-hidden="true">←</span> Results
+    </a>
+    <p class="eyebrow">Monroe Mountain &nbsp;·&nbsp; Fishlake N.F. &nbsp;·&nbsp; UT</p>
+    <h1 class="title">Aspen regeneration<br>after fire — <em>a field atlas</em></h1>
+    <p class="subtitle">Four model surfaces over Monroe Mountain. Toggle layers to compare aspen density, post-fire regeneration probability, phenological signal, and burn severity (RdNBR) — optionally restricted to NLCD forest classes.</p>
+
+    <div class="section-label">View</div>
+    <div class="view-controls" id="view-controls">
+      <div class="toggle-row" id="forest-toggle-row">
+        <button class="toggle" id="forest-toggle" role="switch" aria-checked="true" aria-label="Restrict to forested NLCD classes">
+          <span class="toggle-knob"></span>
+        </button>
+        <div class="toggle-text">
+          <div class="toggle-name">Forest only</div>
+          <div class="toggle-desc">Mask non-forest pixels using NLCD classes 41 / 42 / 43 (deciduous, evergreen, mixed).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Layers</div>
+    <div id="layer-list"></div>
+
+    <div class="section-label">Notes</div>
+    <p class="colophon">
+      <strong>Projection.</strong> Source rasters in EPSG:32612 (UTM 12N) at 30 m resolution; reprojected to Web Mercator for display. Rendered with perceptually appropriate colormaps — diverging schemes are centered at zero, density is displayed on a log scale, probability on a linear 0–1 scale.<br><br>
+      <strong>Forest mask.</strong> When "Forest only" is on, every layer is restricted to NLCD classes 41 (deciduous), 42 (evergreen) and 43 (mixed). The aspen density and high-regen layers are forest-only by construction; the toggle is most informative for phenology and burn severity, which otherwise span the full study extent.<br><br>
+      <strong>Reading the map.</strong> Each layer's opacity is independently adjustable. Hover the map to read out latitude and longitude. Click + drag to pan, scroll to zoom.
+    </p>
+  </aside>
+
+  <!-- ===== Map ===== -->
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-frame"></div>
+
+    <div class="basemap-toggle" role="group" aria-label="Basemap">
+      <button data-basemap="terrain" class="on">Terrain</button>
+      <button data-basemap="satellite">Satellite</button>
+      <button data-basemap="none">None</button>
+    </div>
+
+    <svg class="compass" viewBox="0 0 60 60" aria-hidden="true">
+      <circle cx="30" cy="30" r="26" fill="rgba(243,238,229,.92)" stroke="#1c2520" stroke-width="1"/>
+      <path d="M30 8 L34 30 L30 26 L26 30 Z" fill="#6b3a1f"/>
+      <path d="M30 52 L34 30 L30 34 L26 30 Z" fill="#1c2520" opacity=".85"/>
+      <text x="30" y="14.5" text-anchor="middle" font-family="Fraunces, serif" font-size="8" font-style="italic" fill="#1c2520">N</text>
+    </svg>
+
+    <div class="map-caption">
+      <div class="cap-eyebrow">Field of view</div>
+      <div>Monroe Mountain, Sevier County, Utah — a sub-alpine plateau in the Fishlake National Forest known for some of the largest contiguous aspen stands in the Intermountain West.</div>
+      <div class="cap-coords" id="bbox-line"></div>
+    </div>
+
+    <div class="readout" id="readout">
+      <span class="ro-label">Cursor</span>
+      <div class="ro-row"><span>lat</span><span id="ro-lat">—</span></div>
+      <div class="ro-row"><span>lon</span><span id="ro-lon">—</span></div>
+      <div class="ro-row"><span>zoom</span><span id="ro-zoom">—</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* =========================================================
+   Manifest is fetched at runtime from manifest.json
+   ========================================================= */
+
+const MAP_EL = document.getElementById('map');
+const LAYER_LIST_EL = document.getElementById('layer-list');
+const BBOX_LINE = document.getElementById('bbox-line');
+
+/* default visibility on load */
+const DEFAULT_VISIBLE = new Set(['phenology', 'severity']);
+const DEFAULT_OPACITY = 0.85;
+
+let map;
+const layerState = {}; // key -> { overlay, visible, opacity, spec }
+
+/* ---------- helpers ---------- */
+function fmtNum(n) {
+  if (n === null || n === undefined) return '—';
+  const a = Math.abs(n);
+  if (a === 0) return '0';
+  if (a >= 1000) return n.toFixed(0);
+  if (a >= 10)   return n.toFixed(1);
+  if (a >= 1)    return n.toFixed(2);
+  return n.toFixed(3);
+}
+
+/* Build a CSS gradient string for the legend bar from a matplotlib colormap name.
+   We stage 8–10 sample colors that visually approximate the mpl colormap. */
+const CMAP_STOPS = {
+  'YlGn':    ['#ffffe5','#f7fcb9','#d9f0a3','#addd8e','#78c679','#41ab5d','#238443','#005a32'],
+  'viridis': ['#440154','#482878','#3e4a89','#31688e','#26828e','#1f9e89','#35b779','#6dcd59','#b4de2c','#fde725'],
+  'RdYlGn':  ['#a50026','#d73027','#f46d43','#fdae61','#fee08b','#ffffbf','#d9ef8b','#a6d96a','#66bd63','#1a9850','#006837'],
+  'RdBu_r':  ['#053061','#2166ac','#4393c3','#92c5de','#d1e5f0','#f7f7f7','#fddbc7','#f4a582','#d6604c','#b2182b','#67001f']
+                .reverse(),
+};
+
+function legendGradient(cmapName) {
+  const stops = CMAP_STOPS[cmapName] || ['#000','#fff'];
+  const segs = stops.map((c,i) => `${c} ${(i/(stops.length-1)*100).toFixed(1)}%`).join(', ');
+  return `linear-gradient(to right, ${segs})`;
+}
+
+function legendTicks(spec) {
+  // Show min, center (if diverging), max
+  const out = [];
+  if (spec.norm === 'diverging') {
+    out.push(fmtNum(spec.vmin));
+    out.push(fmtNum(spec.center ?? 0));
+    out.push(fmtNum(spec.vmax));
+  } else if (spec.norm === 'log') {
+    out.push(fmtNum(spec.vmin));
+    out.push('—');
+    out.push(fmtNum(spec.vmax));
+  } else {
+    out.push(fmtNum(spec.vmin));
+    out.push(fmtNum((spec.vmin + spec.vmax)/2));
+    out.push(fmtNum(spec.vmax));
+  }
+  return out;
+}
+
+/* ---------- main ---------- */
+async function init() {
+  const manifest = await fetch('manifest.json').then(r => r.json());
+
+  const b = manifest.bounds;
+  const sw = [b.south, b.west];
+  const ne = [b.north, b.east];
+
+  // Setup map
+  map = L.map(MAP_EL, {
+    center: [manifest.center.lat, manifest.center.lon],
+    zoom: 11,
+    minZoom: 9,
+    maxZoom: 16,
+    zoomControl: true,
+    attributionControl: true,
+  });
+  map.fitBounds([sw, ne], { padding: [10,10] });
+
+  // Basemaps
+  const basemaps = {
+    terrain: L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+      { attribution: 'Tiles &copy; Esri — National Geographic, Esri, DeLorme, NAVTEQ', maxZoom: 18 }
+    ),
+    satellite: L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { attribution: 'Tiles &copy; Esri — Source: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community', maxZoom: 18 }
+    ),
+    none: L.tileLayer('', { attribution: '' }),
+  };
+  let currentBase = basemaps.terrain.addTo(map);
+
+  document.querySelectorAll('.basemap-toggle button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.basemap-toggle button').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      const which = btn.dataset.basemap;
+      map.removeLayer(currentBase);
+      currentBase = basemaps[which];
+      if (which !== 'none') currentBase.addTo(map);
+    });
+  });
+
+  // Bounds line in caption
+  BBOX_LINE.textContent =
+    `${b.south.toFixed(3)}°N — ${b.north.toFixed(3)}°N · ${Math.abs(b.west).toFixed(3)}°W — ${Math.abs(b.east).toFixed(3)}°W`;
+
+  // Forest mask state — applies globally across all layers
+  let forestOnly = true;
+  const HAS_FOREST_MASK = !!manifest.has_forest_mask;
+
+  function urlForLayer(spec) {
+    if (forestOnly && spec.files.forest) return spec.files.forest;
+    return spec.files.full;
+  }
+
+  // Add layers (start invisible; we'll honor DEFAULT_VISIBLE below)
+  manifest.layers.forEach((spec, idx) => {
+    const overlay = L.imageOverlay(
+      urlForLayer(spec),
+      [[spec.bounds.south, spec.bounds.west], [spec.bounds.north, spec.bounds.east]],
+      { opacity: 0, interactive: false, crossOrigin: 'anonymous' }
+    );
+    overlay.addTo(map);
+    layerState[spec.key] = {
+      spec,
+      overlay,
+      visible: false,
+      opacity: DEFAULT_OPACITY,
+    };
+
+    // Build the panel UI for the layer
+    const wrap = document.createElement('div');
+    wrap.className = 'layer';
+    wrap.dataset.key = spec.key;
+    wrap.innerHTML = `
+      <div class="layer-row">
+        <span class="check" role="checkbox" tabindex="0" aria-checked="false" id="chk-${spec.key}"></span>
+        <label class="layer-name" for="chk-${spec.key}">${spec.name}</label>
+      </div>
+      <div class="layer-meta">${spec.cmap} · ${spec.norm} scale · ${spec.units}</div>
+      <div class="layer-desc">${spec.description}</div>
+      <div class="legend">
+        <div class="legend-bar" style="background:${legendGradient(spec.cmap)}"></div>
+        <div class="legend-ticks">
+          ${legendTicks(spec).map(t => `<span>${t}</span>`).join('')}
+        </div>
+      </div>
+      <div class="opacity-row">
+        <span class="opacity-label">opacity</span>
+        <input type="range" min="0" max="100" value="${Math.round(DEFAULT_OPACITY*100)}" id="op-${spec.key}">
+        <span class="opacity-val" id="opv-${spec.key}">${Math.round(DEFAULT_OPACITY*100)}</span>
+      </div>
+    `;
+    LAYER_LIST_EL.appendChild(wrap);
+
+    const chk = wrap.querySelector('.check');
+    const nameLbl = wrap.querySelector('.layer-name');
+    const slider = wrap.querySelector('input[type=range]');
+    const opval = wrap.querySelector('.opacity-val');
+
+    function setVisible(v) {
+      layerState[spec.key].visible = v;
+      chk.setAttribute('aria-checked', v ? 'true' : 'false');
+      wrap.classList.toggle('active', v);
+      const op = v ? layerState[spec.key].opacity : 0;
+      overlay.setOpacity(op);
+      // ensure most-recently-toggled-on layer renders above others
+      if (v) overlay.bringToFront();
+    }
+    function toggle() { setVisible(!layerState[spec.key].visible); }
+
+    chk.addEventListener('click', toggle);
+    chk.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); }
+    });
+    nameLbl.addEventListener('click', toggle);
+
+    slider.addEventListener('input', () => {
+      const v = parseInt(slider.value, 10) / 100;
+      layerState[spec.key].opacity = v;
+      opval.textContent = slider.value;
+      if (layerState[spec.key].visible) overlay.setOpacity(v);
+    });
+
+    // initial visibility
+    if (DEFAULT_VISIBLE.has(spec.key)) {
+      setVisible(true);
+    }
+  });
+
+  // ---- Forest-only toggle wiring ----
+  const forestToggle = document.getElementById('forest-toggle');
+  const forestRow = document.getElementById('forest-toggle-row');
+  if (!HAS_FOREST_MASK) {
+    forestRow.classList.add('is-disabled');
+    forestRow.title = 'No forest mask available — re-run build_layers.py with Monroe_ForestMask.tif present.';
+  } else {
+    forestToggle.addEventListener('click', () => {
+      forestOnly = !forestOnly;
+      forestToggle.setAttribute('aria-checked', forestOnly ? 'true' : 'false');
+      // swap each layer's image URL
+      Object.values(layerState).forEach(({ spec, overlay }) => {
+        overlay.setUrl(urlForLayer(spec));
+      });
+    });
+    forestToggle.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); forestToggle.click(); }
+    });
+  }
+
+  // Cursor readout
+  const roLat = document.getElementById('ro-lat');
+  const roLon = document.getElementById('ro-lon');
+  const roZoom = document.getElementById('ro-zoom');
+  function updateZoom() { roZoom.textContent = map.getZoom().toFixed(1); }
+  updateZoom();
+  map.on('zoom', updateZoom);
+  map.on('mousemove', e => {
+    roLat.textContent = e.latlng.lat.toFixed(4) + '°';
+    roLon.textContent = e.latlng.lng.toFixed(4) + '°';
+  });
+  map.on('mouseout', () => { roLat.textContent = '—'; roLon.textContent = '—'; });
+}
+
+init().catch(err => {
+  console.error(err);
+  MAP_EL.innerHTML = '<div style="padding:20px;color:#6b3a1f;font-family:Newsreader,serif">Failed to load map: ' + err.message + '</div>';
+});
+</script>
+</body>
+</html>
